@@ -1,4 +1,4 @@
-//
+package com.amortization;//
 // Exercise Details:
 // Build an amortization schedule program using Java. 
 // 
@@ -51,13 +51,13 @@ public class RunAmortizationSchedule {
     public RunAmortizationSchedule(AmortizationSchedule input) throws IllegalArgumentException {
 
         if (AmortizationHelper.isValidInput(input)) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Invalid input params ,\n  input dint meet the validation criteria\n");
         }
 
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         //Read Input from console and set values to appropriate getter/setters
 
@@ -69,7 +69,7 @@ public class RunAmortizationSchedule {
 
     }
 
-    public static void execute(AmortizationSchedule input) {
+    public static void execute(AmortizationSchedule input) throws Exception {
         //Generate Amortization Schedule
 
         try {

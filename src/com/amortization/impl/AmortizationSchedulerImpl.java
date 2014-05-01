@@ -57,7 +57,7 @@ public class AmortizationSchedulerImpl implements AmortizationScheduler {
      * Generates amortization schedule table headers and table items
      */
     @Override
-    public void outputAmortizationSchedule(AmortizationSchedule input) {
+    public void outputAmortizationSchedule(AmortizationSchedule input) throws Exception {
 
         // The output should include:
         //	The first column identifies the payment number.
@@ -65,12 +65,12 @@ public class AmortizationSchedulerImpl implements AmortizationScheduler {
         //	The third column shows the amount paid to interest.
         //	The fourth column has the current balance.  The total payment amount and the interest paid fields.
 
-        PrintFormatHelper fsHelper = new PrintFormatHelper();
-        ConsoleOutputPrinter.printf(fsHelper.getHeaderFormatString(),
+        PrintFormatHelper printHealper = new PrintFormatHelper();
+        ConsoleOutputPrinter.printf(printHealper.getHeaderFormatString(),
                 "PaymentNumber", "PaymentAmount", "PaymentInterest",
                 "CurrentBalance", "TotalPayments", "TotalInterestPaid");
 
-        generateAmortizationScheduleTable(input, fsHelper);
+        generateAmortizationScheduleTable(input, printHealper);
     }
 
     /**
@@ -89,10 +89,10 @@ public class AmortizationSchedulerImpl implements AmortizationScheduler {
      * Calculates amortization and generates amortization schedule table .
      *
      * @param input
-     * @param fsHelper
+     * @param printFormatHelper
      */
     @Override
-    public void generateAmortizationScheduleTable(AmortizationSchedule input, PrintFormatHelper fsHelper) {
+    public void generateAmortizationScheduleTable(AmortizationSchedule input, PrintFormatHelper printFormatHelper) throws Exception {
 
         // To create the amortization table, create a loop in your program and follow these steps:
         // 1.      Calculate H = P x J, this is your current monthly interest
@@ -101,57 +101,66 @@ public class AmortizationSchedulerImpl implements AmortizationScheduler {
         // 4.      Set P equal to Q and go back to Step 1: You thusly loop around until the value Q (and hence P) goes to zero.
         //
 
-        long balance = input.getAmountBorrowed();
-        int paymentNumber = 0;
-        long totalPayments = 0;
-        long totalInterestPaid = 0;
+        if (input == null) {
+            new NullPointerException(AmortizationSchedule.class.getName() + "is not initialized.");
+        }
+        if (printFormatHelper == null) {
+            new NullPointerException(PrintFormatHelper.class.getName() + "is not initialized.");
+        } else if (input != null && printFormatHelper != null) {
 
 
-        ConsoleOutputPrinter.printf(fsHelper.getLineItemFormatString(), paymentNumber++, 0d, 0d,
-                ((double) input.getAmountBorrowed()) / 100d,
-                ((double) totalPayments) / 100d,
-                ((double) totalInterestPaid) / 100d);
+            long balance = input.getAmountBorrowed();
+            int paymentNumber = 0;
+            long totalPayments = 0;
+            long totalInterestPaid = 0;
 
-        final int maxNumberOfPayments = input.getInitialTermMonths() + 1;
-        while ((balance > 0) && (paymentNumber <= maxNumberOfPayments)) {
-            // Calculate H = P x J, this is your current monthly interest
-            //long curMonthlyInterest = Math.round(((double) balance) * monthlyInterest);
-            long curMonthlyInterest = calculateCurrMonthInterest(input, balance);
 
-            // the amount required to payoff the loan
-            long curPayoffAmount = balance + curMonthlyInterest;
-
-            // the amount to payoff the remaining balance may be less than the calculated monthlyPaymentAmount
-            long curMonthlyPaymentAmount = calculateCurrMonthPaymentAmount(input, curPayoffAmount);
-
-            // it's possible that the calculated monthlyPaymentAmount is 0,
-            // or the monthly payment only covers the interest payment - i.e. no principal
-            // so the last payment needs to payoff the loan
-            if ((paymentNumber == maxNumberOfPayments) &&
-                    ((curMonthlyPaymentAmount == 0) || (curMonthlyPaymentAmount == curMonthlyInterest))) {
-                curMonthlyPaymentAmount = curPayoffAmount;
-            }
-
-            // Calculate C = M - H, this is your monthly payment minus your monthly interest,
-            // so it is the amount of principal you pay for that month
-            long curMonthlyPrincipalPaid = calculateCurrMonthPrincipalPaid(curMonthlyInterest, curMonthlyPaymentAmount);
-
-            // Calculate Q = P - C, this is the new balance of your principal of your loan.
-            long curBalance = balance - curMonthlyPrincipalPaid;
-
-            totalPayments += curMonthlyPaymentAmount;
-            totalInterestPaid += curMonthlyInterest;
-
-            // output is in dollars
-            ConsoleOutputPrinter.printf(fsHelper.getLineItemFormatString(), paymentNumber++,
-                    ((double) curMonthlyPaymentAmount) / 100d,
-                    ((double) curMonthlyInterest) / 100d,
-                    ((double) curBalance) / 100d,
+            ConsoleOutputPrinter.printf(printFormatHelper.getLineItemFormatString(), paymentNumber++, 0d, 0d,
+                    ((double) input.getAmountBorrowed()) / 100d,
                     ((double) totalPayments) / 100d,
                     ((double) totalInterestPaid) / 100d);
 
-            // Set P equal to Q and go back to Step 1: You thusly loop around until the value Q (and hence P) goes to zero.
-            balance = curBalance;
+            final int maxNumberOfPayments = input.getInitialTermMonths() + 1;
+            while ((balance > 0) && (paymentNumber <= maxNumberOfPayments)) {
+                // Calculate H = P x J, this is your current monthly interest
+                //long curMonthlyInterest = Math.round(((double) balance) * monthlyInterest);
+                long curMonthlyInterest = calculateCurrMonthInterest(input, balance);
+
+                // the amount required to payoff the loan
+                long curPayoffAmount = balance + curMonthlyInterest;
+
+                // the amount to payoff the remaining balance may be less than the calculated monthlyPaymentAmount
+                long curMonthlyPaymentAmount = calculateCurrMonthPaymentAmount(input, curPayoffAmount);
+
+                // it's possible that the calculated monthlyPaymentAmount is 0,
+                // or the monthly payment only covers the interest payment - i.e. no principal
+                // so the last payment needs to payoff the loan
+                if ((paymentNumber == maxNumberOfPayments) &&
+                        ((curMonthlyPaymentAmount == 0) || (curMonthlyPaymentAmount == curMonthlyInterest))) {
+                    curMonthlyPaymentAmount = curPayoffAmount;
+                }
+
+                // Calculate C = M - H, this is your monthly payment minus your monthly interest,
+                // so it is the amount of principal you pay for that month
+                long curMonthlyPrincipalPaid = calculateCurrMonthPrincipalPaid(curMonthlyInterest, curMonthlyPaymentAmount);
+
+                // Calculate Q = P - C, this is the new balance of your principal of your loan.
+                long curBalance = balance - curMonthlyPrincipalPaid;
+
+                totalPayments += curMonthlyPaymentAmount;
+                totalInterestPaid += curMonthlyInterest;
+
+                // output is in dollars
+                ConsoleOutputPrinter.printf(printFormatHelper.getLineItemFormatString(), paymentNumber++,
+                        ((double) curMonthlyPaymentAmount) / 100d,
+                        ((double) curMonthlyInterest) / 100d,
+                        ((double) curBalance) / 100d,
+                        ((double) totalPayments) / 100d,
+                        ((double) totalInterestPaid) / 100d);
+
+                // Set P equal to Q and go back to Step 1: You thusly loop around until the value Q (and hence P) goes to zero.
+                balance = curBalance;
+            }
         }
     }
 
