@@ -23,3 +23,14 @@ Amortization Formula:
              J = Monthly Interest in decimal form:  I / (12 * 100)
              N = Number of months of loan
              M = Monthly Payment Amount
+
+
+
+Usage:
+
+       $Java <space> com.amortization.com.amortization.RunAmortizationSchedule.java
+
+
+
+
+

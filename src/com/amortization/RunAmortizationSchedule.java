@@ -1,4 +1,4 @@
-//
+package com.amortization;//
 // Exercise Details:
 // Build an amortization schedule program using Java. 
 // 
